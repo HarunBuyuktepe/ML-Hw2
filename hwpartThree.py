@@ -106,12 +106,15 @@ def differenceCalc(tFunction, w,limit):
 
     return diff / (count * 1.0)
 
-def app(N_points=10):
+def app(N_samples=1, N_points=10):
     iterations = []  # vector of iterations needed for each PLA
     diff = []  # vector of difference average between f and g
-    w, iteration, tFunction = pla(N_points)
-    iterations.append(iteration)
-    diff.append(differenceCalc(tFunction, w, N_points))
+
+    for i in range(N_samples):
+        # run PLA in sample
+        w, iteration, tFunction = pla(N_points)
+        iterations.append(iteration)
+        diff.append(differenceCalc(tFunction, w,N_points))
 
     print('number of iteration avg: %s ' , (str(sum(iterations) / len(iterations) * 1.0)))
     print()
@@ -120,10 +123,9 @@ def app(N_points=10):
 print()
 print()
 
-print('4. and 5.')
-app(10)
-print('6. and 7.')
-app(100)
+print('8.')
+app(1000,100)
+
 
 
 
