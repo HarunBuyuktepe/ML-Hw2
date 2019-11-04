@@ -158,7 +158,7 @@ def evaluate_diff_f_g(f, w):
 
 
 def run_PLA(N_samples, N_points):
-    samples = []  # vector of 1 clasified, 0 misclassified
+    samples = [[], []]  # vector of 1 clasified, 0 misclassified
     iterations = []  # vector of iterations needed for each PLA
     b_misclassified = False
     diff = []  # vector of difference average between f and g
@@ -167,7 +167,7 @@ def run_PLA(N_samples, N_points):
         # run PLA in sample
         t_set, w, iteration, f = PLA(N_points)
         iterations.append(iteration)
-        # check if points are classified or not
+        #check points are classified or not
         for i in range(len(t_set)):
             point = t_set[i][0]
             s = h(w, point)

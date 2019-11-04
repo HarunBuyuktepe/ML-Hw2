@@ -12,8 +12,13 @@ def dataSet(N=100):
 
 def targetFunction():
     #Create target function
-    a = 3 * abs(random.uniform(-1, 1) + random.uniform(-1, 1)) / 2 * abs(random.uniform(-1, 1) - random.uniform(-1, 1))
-    b = random.uniform(-1, 1) - a * random.uniform(-1, 1)
+    x1 = random.uniform(-1, 1)
+    y1 = random.uniform(-1, 1)
+    x2 = random.uniform(-1, 1)
+    y2 = random.uniform(-1, 1)
+
+    a = abs(x1 - x2) / abs(y1 - y2)
+    b = y1 - a * x1
     return [a, b]  # a*x + b
 
 def applicateFunction(trainingSet, tFunction):
@@ -86,12 +91,13 @@ def pla(N):
             w[0] = w[0] + yn * xn[0]
             w[1] = w[1] + yn * xn[1]
             w[2] = w[2] + yn * xn[2]
-    return w, iteration, tFunction
+    return w, iteration, tFunction,t_set
 
 def differenceCalc(tFunction, w,limit):
     #return avarage difference
     count = 0
     diff = 0
+
     while count < limit:
         count = count + 1
         #examine with random values
@@ -109,13 +115,31 @@ def differenceCalc(tFunction, w,limit):
 def app(N_samples=1, N_points=10):
     iterations = []  # vector of iterations needed for each PLA
     diff = []  # vector of difference average between f and g
-
+    samples = [[],[]]  # vector of 1 clasified, 0 misclassified
+    b_misclassified = False
+    countMiss=0
     for i in range(N_samples):
         # run PLA in sample
-        w, iteration, tFunction = pla(N_points)
+        w, iteration, tFunction,t_set = pla(N_points)
         iterations.append(iteration)
         diff.append(differenceCalc(tFunction, w,N_points))
+        # check points are classified or not
+        for i in range(len(t_set)):
+            point = t_set[i][0]
+            s = hypothesis(w, point)
+            yn = t_set[i][1]
+            if yn != s:
+                samples.append(0)
+                b_misclassified = True
+                countMiss=countMiss+1
+                break
+        if not b_misclassified: samples.append(1)
+        b_misclassified = False
 
+    print('number of samples misclassified: %s ', countMiss)
+    print()
+    print('number of classified samples: %s ', samples.count(1)-countMiss)
+    print()
     print('number of iteration avg: %s ' , (str(sum(iterations) / len(iterations) * 1.0)))
     print()
     print('average of difference in function g: %s' , (sum(diff) / (len(diff) * 1.0)))
@@ -126,6 +150,32 @@ print()
 print('8.')
 app(1000,100)
 
+print()
+print()
+print()
+print()
+print()
+print()
+print()
+print()
+
+print('9.')
+app(1000,100)
+
+print()
+print()
+print()
+print()
+print()
+print()
+
+print('10.')
+app(1000,10)
+
+print()
+print()
+print()
+print()
 
 
 
