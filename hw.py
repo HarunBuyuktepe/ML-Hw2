@@ -1,107 +1,133 @@
-import numpy
+import random
 
-def data(N):
-    'return N random points (x,y)'
+
+def dataSet(N=100):
+    #Create random data set
     d = []
     for i in range(N):
-        x = numpy.random.uniform(-1, 1)
-        y = numpy.random.uniform(-1, 1)
+        x = random.uniform(-1, 1)
+        y = random.uniform(-1, 1)
         d.append([x, y])
     return d
 
-def generateRandomTargetFunction():
-    x2 = numpy.random.uniform(-1, 1)
-    y2 = numpy.random.uniform(-1, 1)
-    x1 = numpy.random.uniform(-1, 1)
-    y1 = numpy.random.uniform(-1, 1)
-    a = abs(y1 - x2) / abs(x1 - y2)
-    b = y2 - a * x2
-    return  a,b
+def targetFunction():
+    #Create target function
+    a = 3 * abs(random.uniform(-1, 1) + random.uniform(-1, 1)) / 2 * abs(random.uniform(-1, 1) - random.uniform(-1, 1))
+    b = random.uniform(-1, 1) - a * random.uniform(-1, 1)
+    return [a, b]  # a*x + b
 
-def applicateFunction(coord, targetFunction):
+def applicateFunction(trainingSet, tFunction):
     'maps a point (x1,x2) to a sign -+1 following function f '
-    x = coord[0] #coordinate of data set
-    y = coord[1]
-    print('x',x,'y',y)
-    y1 = targetFunction(x)
-    print('y',y1)
+    x1 = trainingSet[0]
+    y1 = trainingSet[1]
 
-    if y1 > y:
+    y = tFunction(x1)
+    compare_to = y1
+    return comp(y, compare_to)
+    #training set's y value > compare function's result y is 1 or 0
+
+def comp(x, y=0):
+    #Compare x and y
+    if x > y:
         return +1
     else:
         return -1
 
-
-def build_misclassified_set(t_set, w):
-    '''returns a tuple of index of t_set items
-such that t_set[index] is misclassified <=> yn != sign(w*point)'''
+def splitMissPlacedPoint(t_set, w):
+    #return misclassified point index in trainig set
     res = tuple()
-    print('tuple ne dayıcım',res)
+
     for i in range(len(t_set)):
         point = t_set[i][0]
-        print('point',point)
-        print('w',w)
-        s = h(w, point)
+        s = hypothesis(w, point)
         yn = t_set[i][1]
         if s != yn:
-            print('s',s,'yn',yn,'x',point[1])
-            res = i
-            print('peki buraya hiç uğrar mısın canim',i)
+            res = res + (i,)
+            #collect to misclassified data indexes
     return res
 
-
-def h(w, x):
-    'Hypothesis function returns w0 x0 + w1 x1 ... + wn xn'
+def hypothesis(w, x):
+    #hypothesis function to classify training set
     res = 0
     for i in range(len(x)):
         res = res + w[i] * x[i]
-        print('res',res,'w',w)
-    if res > 0:
-        return +1
-    else:
-        return -1
+    return comp(res)
 
-
-def PLA(N):
-    dataSet = (data(N))  # our data set generated here
-    funcCoordinates = generateRandomTargetFunction()  # random target function's norm coordinates
-    print('funcCoordinates', funcCoordinates[0], funcCoordinates[1])
-    targetFunction = lambda x: funcCoordinates[0] * x + funcCoordinates[1]  # our target function created "ax+b"
-
+def pla(N):
+    iteration = 0
+    dataset = dataSet(N)
+    funcVals = targetFunction()
+    tFunction = lambda x: funcVals[0] * x + funcVals[1]
+    w = [0, 0, 0]
     t_set = []
-    for i in range(len(dataSet)):
-        coor = dataSet[i]
-        y = applicateFunction(coor, targetFunction)  # map x to +1 or -1 for training sets
-        t_set.append([[1, coor[0], coor[1]], y])
 
-#    for i in range(len(t_set)):
-#        print('training set',t_set[i])
-    iterate=True
-    count=0
-    w=[0,0,0]
+    for i in range(len(dataset)):
+        trainingSet = dataset[i]
+        y = applicateFunction(trainingSet, tFunction)  # map x to +1 or -1 for training points
+        t_set.append([[1, trainingSet[0], trainingSet[1]], y])
+
+    iterate = True
     while iterate:
-        count=count+1
-        misclassified_set = build_misclassified_set(t_set, w)
-        if (misclassified_set is None) : break
-        print('misclassified_set',misclassified_set)
-        index = numpy.random.randint(0, (misclassified_set) )
-        print('index',index)
-        p = misclassified_set
+        iteration = iteration + 1
+        misclassified_set = splitMissPlacedPoint(t_set, w)
+        #detect mis classified set
+        if len(misclassified_set) == 0: break
+        # if there are no misclassified points break
+        index = random.randint(0, len(misclassified_set) - 1)
+        #choose random misclassified trainind set
+        p = misclassified_set[index]
         point = t_set[p][0]
 
-        s = h(w, point)
-        yn = t_set[p][1]
-        if s != yn:
+        s = hypothesis(w, point)
+        yn = t_set[p][1] #give misclassified result
+
+        if s != yn:#update weights if misclassified
             xn = point
             w[0] = w[0] + yn * xn[0]
             w[1] = w[1] + yn * xn[1]
             w[2] = w[2] + yn * xn[2]
-    return t_set, w, count, targetFunction
+    return w, iteration, tFunction
 
+def differenceCalc(tFunction, w,limit):
+    #return avarage difference
+    count = 0
+    diff = 0
+    while count < limit:
+        count = count + 1
+        #examine with random values
+        x = random.uniform(-1, 1)
+        y = random.uniform(-1, 1)
+        vector = [1, x, y]
 
-p=PLA(100)
-for i in range(len(p)):
-    print(p[i])
+        sign_f = comp(tFunction(x), y)
+        sign_g = hypothesis(w, vector)
+        #check result and count
+        if sign_f != sign_g: diff = diff + 1
+
+    return diff / (count * 1.0)
+
+def app(N_samples=10, N_points=10):
+    iterations = []  # vector of iterations needed for each PLA
+    diff = []  # vector of difference average between f and g
+
+    for i in range(N_samples):
+        # run PLA in sample
+        w, iteration, tFunction = pla(N_points)
+        iterations.append(iteration)
+        diff.append(differenceCalc(tFunction, w,N_points))
+
+    print('number of iteration avg: %s ' , (str(sum(iterations) / len(iterations) * 1.0)))
+    print()
+    print('average of difference in function g: %s' , (sum(diff) / (len(diff) * 1.0)))
+
+print()
+print()
+
+print('4. and 5.')
+app(10,10)
+print('6. and 7.')
+app(10,100)
+
 
 
 

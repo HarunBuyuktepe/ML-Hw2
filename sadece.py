@@ -182,12 +182,14 @@ def run_PLA(N_samples, N_points):
 
         b_misclassified = False
 
-    print(    'number of samples misclassified: %s ' % samples.count(0))
-    print(    'number of classified samples: %s ' % samples.count(1))
-    print(    'number of iteration avg: %s ' % (str(sum(iterations) / len(iterations) * 1.0)))
-    print(    'average of difference in function g: %s' % (sum(diff) / (len(diff) * 1.0)))
+    print(    'number of samples misclassified: %s ' ,samples.count(0))
+    print()
+    print(    'number of classified samples: %s ' , samples.count(1))
+    print()
+    print(    'number of iteration avg: %s ' , (str(sum(iterations) / len(iterations) * 1.0)))
+    print()
+    print(    'average of difference in function g: %s' , (sum(diff) / (len(diff) * 1.0)))
 
 
 
-PLA(10)
-
+run_PLA(100,100)
